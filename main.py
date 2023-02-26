@@ -53,14 +53,15 @@ class MainWindow(QMainWindow):
 
         self.show()
 
-    def add_gaussian_noise(self, img, mean=0, stddev=50):
+    def add_bilateral_noise(self, img, d=9, sigmaColor=75, sigmaSpace=75):
         """
-        Adds Gaussian noise to the input image.
+        Adds bilateral noise to the input image.
 
         Parameters:
         img (numpy.ndarray): Input image.
-        mean (float): Mean of the Gaussian noise (default=0).
-        stddev (float): Standard deviation of the Gaussian noise (default=50).
+        d (int): Diameter of each pixel neighborhood that is used during filtering (default=9).
+        sigmaColor (float): Filter sigma in the color space (default=75).
+        sigmaSpace (float): Filter sigma in the coordinate space (default=75).
 
         Returns:
         numpy.ndarray: Noisy image.
@@ -68,9 +69,8 @@ class MainWindow(QMainWindow):
         # Convert the image to float32
         img = np.float32(img)
 
-        # Add Gaussian noise to the image
-        noise = np.random.normal(mean, stddev, img.shape)
-        noisy_img = cv2.add(img, noise)
+        # Add bilateral noise to the image
+        noisy_img = cv2.bilateralFilter(img, d, sigmaColor, sigmaSpace)
 
         # Clip the pixel values to the valid range
         noisy_img = np.clip(noisy_img, 0, 255)
@@ -79,6 +79,7 @@ class MainWindow(QMainWindow):
         noisy_img = np.uint8(noisy_img)
 
         return noisy_img
+
     def selectImage(self):
         # Create a QSettings object to remember the last location used by the QFileDialog
         settings = QSettings('MyOrganization', 'MyApp')
@@ -108,11 +109,15 @@ class MainWindow(QMainWindow):
         custom_config = r'--oem 3 --psm 6 -l eng'
         
         img = self.label.pixmap().toImage()
-        
-         
+    
         pil_img = ImageQt.fromqimage(img)
-        pil_img = self.add_gaussian_noise(pil_img)
-        d = pytesseract.image_to_data(pil_img, config=custom_config, output_type=Output.DICT)
+        # Convert the ImageQt object to a numpy array
+        np_img = np.array(pil_img)
+        # np_img = self.add_bilateral_noise(np_img)
+        # Convert the noisy numpy array back to an ImageQt object
+        # pil_img = ImageQt.ImageQt(Image.fromarray(np_img))
+
+        d = pytesseract.image_to_data(np_img, config=custom_config, output_type=Output.DICT)
 
         # Convert OCR result into DataFrame
         df = pd.DataFrame(d)
@@ -148,7 +153,7 @@ class MainWindow(QMainWindow):
                 text += ln['text'] + ' '
                 prev_left += len(ln['text']) + added + 1
             text += '\n'
-        print(text)
+        # print(text)
         return text
 
     def keyPressEvent(self, event):
