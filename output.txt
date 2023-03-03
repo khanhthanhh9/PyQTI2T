@@ -1,15 +1,9 @@
 
- def edaptive_threshold(image): 
-     # Get the  average color of the four border  pixels 
-     top = np.mean(image[0]) 
-     bottom = np.mean(image[-1]) 
-     left = np.mean(image[:,  2]) 
-     right = np.mean(image[:,  -1]) 
-     # Determine the  type of thresholding based  on the average color 
-     if top + bottom  + left + right > 510: 
-         # Use  binary thresholding for light background 
-         thresh =  cv2.threshold(image, 9, 255,  cv2.THRESH BINARY + cv2.THRESH_OTSU) 
-     else: 
-         # Use  binary inverse thresholding for  dark background 
-         thresh =  cv2.threshold(image, 9, 255,  cv2.THRESH BINARY _INV + cv2.THRESH 0 
-     return thresh 
+        def title  case(title,  minor_words=None): 
+            if not title: 
+                return  ‘' 
+            if not minor_words: 
+                minor_words  =  [] 
+            else: 
+                minor_words  =  minor_words. lower().split() 
+            return  ‘ ‘.join([word.capitalize()   if  word. lower() 
